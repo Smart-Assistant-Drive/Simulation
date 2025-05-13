@@ -1,5 +1,5 @@
+import io.github.andreabrighi.gradle.gitsemver.conventionalcommit.ConventionalCommit
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-// import io.github.andreabrighi.gradle.gitsemver.conventionalcommit.ConventionalCommit
 
 plugins {
     kotlin("jvm")
@@ -20,12 +20,24 @@ repositories {
     google()
 }
 
+gitSemVer {
+    maxVersionLength.set(20)
+    buildMetadataSeparator.set("-")
+    commitNameBasedUpdateStrategy(ConventionalCommit::semanticVersionUpdate)
+}
+
+buildscript {
+    dependencies {
+        classpath(libs.convetional)
+    }
+}
+
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.desktop.common)
+    implementation(compose.desktop.currentOs)
 }
 
 compose.desktop {
