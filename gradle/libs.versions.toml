@@ -1,0 +1,20 @@
+[versions]
+kotlin="2.1.0"
+compose="1.7.3"
+gitSemVer = "3.1.7"
+dokka = "1.9.20"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning-gradle-plugin", version.ref = "gitSemVer" }
+kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.86.1" }
+taskTree = { id = "com.dorongold.task-tree", version = "4.0.0" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+compose-plugins = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "compose" }
+
+
+[libraries]
+convetional = { group = "io.github.andreabrighi", name ="conventional-commit-strategy-for-git-sensitive-semantic-versioning-gradle-plugin", version = "1.0.12" }
+mockito-kotlin = {group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.4.0" }
+archunit = { group = "com.tngtech.archunit", name = "archunit", version = "1.3.0" }
