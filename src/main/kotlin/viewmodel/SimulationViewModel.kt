@@ -12,70 +12,199 @@ import model.Car
 import model.Direction
 import model.DirectionFactory
 import model.Point
-import kotlin.math.atan
+import model.RoadUtilities
+import model.TrafficLight
+import model.Vector2D
 
 class SimulationViewModel {
-    // Use MutableStateFlow for mutable state and StateFlow for read-only access.
-    private val _count = MutableStateFlow(0) // Initialize directly.
-    val count: StateFlow<Int> = _count.asStateFlow() // Expose as read-only
-
-    private val _message = MutableStateFlow("Initial Message")
-    val message: StateFlow<String> = _message.asStateFlow()
-
     private val _roadMap = MutableStateFlow<List<Direction>>(listOf())
     val roadMap: StateFlow<List<Direction>> = _roadMap.asStateFlow()
 
-    private val _trafficLight = MutableStateFlow(0)
+    private val _junctions = MutableStateFlow<List<Point>>(listOf())
+    val junctions: StateFlow<List<Point>> = _junctions.asStateFlow()
+
+    private val _trafficLight = MutableStateFlow<List<TrafficLight>>(listOf())
     val trafficLight = _trafficLight // Expose as read-only
     private val _cars = MutableStateFlow(listOf<Car>(Car(Point(0.0, 0.0))))
     val cars: StateFlow<List<Car>> = _cars.asStateFlow()
 
-    fun getRoadMap() {
+    suspend fun getRoadMap() {
         // Simulate a network or database call
-        CoroutineScope(Dispatchers.IO).launch {
-            // Simulate a delay for fetching data
-            val roadMapData1 =
-                listOf(
-                    Point(0.0, 0.0),
-                    Point(100.0, 100.0),
-                    Point(100.0, 200.0),
-                    Point(200.0, 150.0),
-                )
-            val roadMapData2 =
-                listOf(
-                    Point(200.0, 350.0),
-                    Point(100.0, 400.0),
-                    Point(100.0, 300.0),
-                    Point(0.0, 200.0),
-                )
-                /*listOf(
-                    Point(200.0, 100.0), // Top
-                    Point(171.0, 171.0), // Top-right
-                    Point(100.0, 300.0), // Right
-                    Point(100.0 - 71, 171.0), // Bottom-right
-                    Point(0.0, 100.0), // Bottom
-                    Point(100.0 - 71, 100.0 - 71), // Bottom-left
-                    Point(100.0, 0.0), // Left
-                    Point(171.0, 100.0 - 71), // Top-left
-                    Point(200.0, 100.0), // Top
-                )*/
-            val directionsData =
-                listOf(
-                    DirectionFactory.createDirection(roadMapData1, 2),
-                    DirectionFactory.createDirection(roadMapData2, 2),
-                )
-            withContext(Dispatchers.Main) {
-                _roadMap.value = directionsData
+        val initialX = 100
+        val initialY = 100
+        val endX = 2000
+        val endY = 1000
+        val step = 100
+        val distance = 100
+        val points1 =
+            (0..4)
+                .map { i ->
+                    when (i) {
+                        0 ->
+                            (initialY + step downTo initialY + step step step).map {
+                                Point(initialX.toDouble(), it.toDouble())
+                            }
+
+                        1 ->
+                            (initialX..endX - step step step).map {
+                                Point(it.toDouble(), initialY.toDouble())
+                            }
+
+                        2 ->
+                            (initialY..endY - step step step).map {
+                                Point(endX.toDouble(), it.toDouble())
+                            }
+
+                        3 ->
+                            (endX downTo initialX + step step step).map {
+                                Point(it.toDouble(), endY.toDouble())
+                            }
+
+                        4 ->
+                            (endY downTo initialY + step step step).map {
+                                Point(initialX.toDouble(), it.toDouble())
+                            }
+
+                        else -> emptyList()
+                    }
+                }.flatten()
+
+        val points2 =
+            (0..4)
+                .map { i ->
+                    when (i) {
+                        0 ->
+                            (endY - step - distance..endY - step - distance step step).map {
+                                Point(initialX.toDouble() + distance, it.toDouble())
+                            }
+
+                        1 ->
+                            (initialX + distance..endX - step - distance step step).map {
+                                Point(it.toDouble(), endY.toDouble() - distance)
+                            }
+
+                        2 ->
+                            (endY - distance downTo initialY + step + distance step step).map {
+                                Point(endX.toDouble() - distance, it.toDouble())
+                            }
+
+                        3 ->
+                            (endX - distance downTo initialX + step + distance step step).map {
+                                Point(it.toDouble(), initialY.toDouble() + distance)
+                            }
+
+                        4 ->
+                            (initialY + distance..endY - distance - step step step).map {
+                                Point(initialX.toDouble() + distance, it.toDouble())
+                            }
+
+                        else -> emptyList()
+                    }
+                }.flatten()
+
+        val middleX = (initialX + endX) / 2 - distance / 4
+        val points3 =
+            (initialY..endY step step).map {
+                Point(middleX.toDouble(), it.toDouble())
             }
+        val points4 =
+            (endY downTo initialY step step).map {
+                Point(middleX.toDouble() + distance / 2, it.toDouble())
+            }
+
+        val directionsData =
+            listOf(
+                DirectionFactory.createDirection(points1, 2),
+                DirectionFactory.createDirection(points2, 2),
+                DirectionFactory.createDirection(points3, 1),
+                DirectionFactory.createDirection(points4, 1),
+            )
+
+        val junctions =
+            listOf(
+                Point(middleX.toDouble(), initialY.toDouble() + distance),
+                Point(middleX.toDouble(), endY.toDouble()),
+            )
+
+        val trafficLight =
+            junctions
+                .mapIndexed { i, j ->
+                    (0..2).map {
+                        when (it) {
+                            0 -> TrafficLight(Point(j.x + 1.25 * distance, j.y - distance / 2), 0) // Green
+                            1 ->
+                                TrafficLight(
+                                    Point(
+                                        j.x + distance / 4,
+                                        if (i % 2 == 0) {
+                                            j.y + distance.toDouble() - distance / 2
+                                        } else {
+                                            j.y - distance.toDouble() - distance / 2
+                                        },
+                                    ),
+                                    1,
+                                ) // Yellow
+                            else -> TrafficLight(Point(j.x - 0.75 * distance, j.y - distance / 2), 0) // Red
+                        }
+                    }
+                }.flatten()
+
+        withContext(Dispatchers.Main) {
+            _roadMap.value = directionsData
+            _junctions.value = junctions
+            _trafficLight.value = trafficLight
+        }
+    }
+
+    fun startSimulation(cars: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            getRoadMap()
+            createCars(cars)
+            startTrafficLight()
+            startCars()
+            changeLine()
+        }
+    }
+
+    suspend fun createCars(cars: Int) {
+        val speed = 10 // Set a default speed for the cars
+        val newCars =
+            (0..cars - 1).map {
+                val directionIndex = (0..1).random() // Randomly choose a direction
+                val road = _roadMap.value[directionIndex].roads[0] // Get the first direction
+                val roadPoints = road.size
+                val pointIndex = (0 until roadPoints).random() // Randomly choose a point on the road
+                val point = road[pointIndex]
+                val nextPointIndex = (pointIndex + 1) % roadPoints // Wrap around to the start if at the end
+                val direction =
+                    Vector2D
+                        .fromPoints(
+                            point,
+                            road[nextPointIndex], // Wrap around to the start if at the end
+                        ).normalize() // Get the direction vector from the point to the next point)
+                Car(
+                    point,
+                    speed,
+                    direction,
+                    directionIndex,
+                    0,
+                    nextPointIndex,
+                ) // Create a car with a random point and fixed speed
+            }
+        withContext(Dispatchers.Main) {
+            _cars.value = newCars // Update the state flow on the main thread.
         }
     }
 
     fun startTrafficLight() {
         CoroutineScope(Dispatchers.IO).launch {
             while (true) {
-                delay(1000) // Delay for 1 second
+                delay(2000) // Delay for 1 second
                 withContext(Dispatchers.Main) {
-                    _trafficLight.value = (_trafficLight.value + 1) % 3 // Cycle through 0, 1, 2
+                    _trafficLight.value =
+                        _trafficLight.value.map { trafficLight ->
+                            trafficLight.changeState()
+                        } // Update the state flow on the main thread.
                 }
             }
         }
@@ -83,78 +212,38 @@ class SimulationViewModel {
 
     fun startCars() {
         CoroutineScope(Dispatchers.IO).launch {
-            _cars.value.map { car ->
-                car.setSpeed(10) // Set speed for each car
-                car.setDirection(atan(1.0)) // Set direction for each car
-            }
             while (true) {
-                delay(1000) // Delay for 1 second
+                delay(100) // Delay for 1 second
+                val newCars =
+                    _cars.value.map { car ->
+                        RoadUtilities.carMoveSafety(
+                            car,
+                            _roadMap.value,
+                        ) // Move the car safely along the road
+                    }
+
                 withContext(Dispatchers.Main) {
-                    val newCars =
-                        _cars.value.map { car ->
-                            car.move()
-                        }
-                    // _cars.value = newCars // Update the state flow on the main thread.
+                    _cars.value = newCars // Update the state flow on the main thread.
                 }
             }
         }
     }
 
-    // Function to increment the counter.  Now uses withContext.
-    fun increment() {
-        //  Use Dispatchers.IO for non-CPU-bound operations like database or network.
-        //  In this simple example, the increment operation is very light,
-        //  but using IO is a good practice for potentially blocking operations.
+    fun changeLine() {
         CoroutineScope(Dispatchers.IO).launch {
-            // launch a new coroutine
-            val newCount = _count.value + 1
-            withContext(Dispatchers.Main) {
-                _count.value = newCount // Update the state flow on the main thread.
-                _message.value = "Incremented! Count: $newCount"
-            }
-        }
-    }
-
-    // Function to decrement the counter.  Now uses withContext.
-    fun decrement() {
-        CoroutineScope(Dispatchers.IO).launch {
-            val newCount = _count.value - 1
-            withContext(Dispatchers.Main) {
-                _count.value = newCount
-                _message.value = "Decremented! Count: $newCount"
-            }
-        }
-    }
-
-    fun reset() {
-        CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main) {
-                _count.value = 0
-                _message.value = "Reset to zero!"
+            while (true) {
+                delay(5000) // Delay for 1 second
+                val newCars =
+                    _cars.value.map { car ->
+                        RoadUtilities.changeLine(
+                            car,
+                            _roadMap.value,
+                        ) // Change the line of the car
+                    }
+                withContext(Dispatchers.Main) {
+                    _cars.value = newCars // Update the state flow on the main thread.
+                }
             }
         }
     }
 }
-
-/*suspend fun getRoadMap(): List<Point> = withContext(Dispatchers.IO) {
-val jsonString = this::class.java.classLoader.getResource("road.json")?.readText()
-        ?: throw IllegalStateException("Could not read road.json")
-    Json.decodeFromString(jsonString)
-}
-
-fun getRoadMap(): List<Point> =
-    listOf(
-        Point(0, 0),
-        Point(100, 100),
-        Point(200, 50),
-        Point(300, 150),
-        Point(400, 100),
-        Point(500, 200),
-        Point(600, 50),
-        Point(700, 150),
-        Point(800, 100),
-        Point(900, 200)
-    )
-
-}
-*/
