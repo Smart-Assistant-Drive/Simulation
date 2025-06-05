@@ -1,4 +1,11 @@
-package model
+package model.math
+
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
 object Math2D {
     fun calculateIntersection(
@@ -8,19 +15,19 @@ object Math2D {
         angleSecond: Double,
     ): Point? {
         // Check for vertical lines (angle = π/2 or 3π/2)
-        val isFirstVertical = kotlin.math.abs(kotlin.math.cos(angleFirst)) < 1e-10
-        val isSecondVertical = kotlin.math.abs(kotlin.math.cos(angleSecond)) < 1e-10
+        val isFirstVertical = abs(cos(angleFirst)) < 1e-10
+        val isSecondVertical = abs(cos(angleSecond)) < 1e-10
 
         if (isFirstVertical && isSecondVertical) {
             return null // Both lines are vertical
         }
 
         // Line 1: y = m1 * x + b1
-        val m1 = kotlin.math.tan(angleFirst)
+        val m1 = tan(angleFirst)
         val b1 = pointFirst.y - m1 * pointFirst.x
 
         // Line 2: y = m2 * x + b2
-        val m2 = kotlin.math.tan(angleSecond)
+        val m2 = tan(angleSecond)
         val b2 = pointSecond.y - m2 * pointSecond.x
 
         // Check if lines are parallel (same slope)
@@ -50,20 +57,20 @@ object Math2D {
         pointFirst: Point,
         pointSecond: Point,
     ): Double =
-        kotlin.math.atan2(
+        atan2(
             (pointSecond.y - pointFirst.y),
             (pointSecond.x - pointFirst.x),
         )
 
-    fun calculatePerpendicularAngle(angle: Double): Double = angle + kotlin.math.PI / 2
+    fun calculatePerpendicularAngle(angle: Double): Double = angle + PI / 2
 
     fun calculateTranslation(
         point: Point,
         angle: Double,
         distance: Double,
     ): Point {
-        val x = point.x + distance * kotlin.math.cos(angle)
-        val y = point.y + distance * kotlin.math.sin(angle)
+        val x = point.x + distance * cos(angle)
+        val y = point.y + distance * sin(angle)
         return Point(x, y)
     }
 }

@@ -1,6 +1,8 @@
-package model
+package model.domain
 
-import model.Math2D.calculateIntersection
+import model.math.Math2D
+import model.math.Math2D.calculateIntersection
+import model.math.Point
 
 typealias Lines = List<Point>
 

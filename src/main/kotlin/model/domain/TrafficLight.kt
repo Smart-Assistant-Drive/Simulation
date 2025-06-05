@@ -1,4 +1,6 @@
-package model
+package model.domain
+
+import model.math.Point
 
 data class TrafficLight(
     val position: Point,

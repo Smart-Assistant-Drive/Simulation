@@ -1,9 +1,12 @@
-package model
+package model.domain
+
+import model.math.Point
+import model.math.Vector2D
 
 data class Car(
     val position: Point,
     val speed: Int = 0,
-    val direction: Vector2D = Vector2D.zero(),
+    val direction: Vector2D = Vector2D.Companion.zero(),
     val directionIndex: Int = 0, // Index of the current direction in the road
     val lineIndex: Int = 0, // Line index on the road
     val reachPointIndex: Int = 0, // Index of the closest point on the road not yet reached

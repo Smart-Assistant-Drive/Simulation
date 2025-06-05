@@ -1,4 +1,4 @@
-package model
+package model.math
 
 import java.lang.Math.toDegrees
 import kotlin.math.atan2

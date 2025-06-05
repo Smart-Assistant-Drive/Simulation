@@ -8,7 +8,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import model.TrafficLight
+import model.domain.TrafficLight
 
 @Suppress("ktlint:standard:function-naming")
 @Composable

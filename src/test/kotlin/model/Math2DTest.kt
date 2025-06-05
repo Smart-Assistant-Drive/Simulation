@@ -1,5 +1,7 @@
 package model
 
+import model.math.Math2D
+import model.math.Point
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
-import model.Car
+import model.domain.Car
 
 @Suppress("ktlint:standard:function-naming")
 @Composable

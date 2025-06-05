@@ -1,4 +1,7 @@
-package model
+package model.domain
+
+import model.math.Point
+import model.math.Vector2D
 
 object RoadUtilities {
     fun carMoveSafety(
@@ -10,16 +13,16 @@ object RoadUtilities {
         val currentDirection = directions[car.directionIndex]
         val currentRoad = currentDirection.roads[car.lineIndex]
         val currentPoint = currentRoad[car.reachPointIndex]
-        val vector = Vector2D.fromPoints(newPosition, currentPoint)
+        val vector = Vector2D.Companion.fromPoints(newPosition, currentPoint)
         if (car.changingLineTo != null) {
             val changingRoad = currentDirection.roads[car.changingLineTo]
             val changingPoint = changingRoad[car.reachPointIndex]
-            val changeVector = Vector2D.fromPoints(newPosition, changingPoint)
-            if (vector.normalize() == car.direction || vector == Vector2D.zero()) {
-                if (vector == Vector2D.zero()) {
+            val changeVector = Vector2D.Companion.fromPoints(newPosition, changingPoint)
+            if (vector.normalize() == car.direction || vector == Vector2D.Companion.zero()) {
+                if (vector == Vector2D.Companion.zero()) {
                     val newPointIndex = (car.reachPointIndex + 1) % changingRoad.size
                     val newPoint = changingRoad[newPointIndex]
-                    val newVector = Vector2D.fromPoints(newPosition, newPoint)
+                    val newVector = Vector2D.Companion.fromPoints(newPosition, newPoint)
                     return newCar.setDirection(newVector.normalize()).setClosesPointIndex(car.reachPointIndex)
                 }
                 return newCar.setDirection(changeVector.normalize())
@@ -28,7 +31,7 @@ object RoadUtilities {
                 if (changeDistance < 10.0) {
                     val newReachedPointIndex = (car.reachPointIndex + 1) % changingRoad.size
                     val newReachedPoint = changingRoad[newReachedPointIndex]
-                    val newVector = Vector2D.fromPoints(changingPoint, newReachedPoint)
+                    val newVector = Vector2D.Companion.fromPoints(changingPoint, newReachedPoint)
                     return newCar
                         .setPosition(changingPoint)
                         .setDirection(newVector.normalize())
@@ -50,7 +53,7 @@ object RoadUtilities {
                     newPoint = currentRoad[newPointIndex]
                 } while (newPoint == currentPoint)
 
-                val newVector = Vector2D.fromPoints(currentPoint, newPoint).normalize()
+                val newVector = Vector2D.Companion.fromPoints(currentPoint, newPoint).normalize()
                 return newCar
                     .setPosition(currentPoint)
                     .setDirection(newVector)

@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import model.Car
-import model.Direction
-import model.DirectionFactory
-import model.Point
-import model.RoadUtilities
-import model.TrafficLight
-import model.Vector2D
+import model.domain.Car
+import model.domain.Direction
+import model.domain.DirectionFactory
+import model.domain.RoadUtilities
+import model.domain.TrafficLight
+import model.math.Point
+import model.math.Vector2D
 
 class SimulationViewModel {
     private val _roadMap = MutableStateFlow<List<Direction>>(listOf())
