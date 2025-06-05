@@ -2,6 +2,8 @@ package model
 
 import model.Math2D.calculateIntersection
 
+typealias Lines = List<Point>
+
 object DirectionFactory {
     /**
      * Creates a [Direction] object from a list of points and the number of lines.
@@ -60,7 +62,7 @@ object DirectionFactory {
             }
         }
         return Direction(
-            roads = linesPoint.map { Road(it) },
+            roads = linesPoint.map { it },
         )
     }
 }

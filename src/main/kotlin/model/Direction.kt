@@ -1,5 +1,5 @@
 package model
 
 data class Direction(
-    val roads: List<Road>,
+    val roads: List<Lines>,
 )
