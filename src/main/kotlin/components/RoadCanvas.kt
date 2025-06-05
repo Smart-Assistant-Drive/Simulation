@@ -21,13 +21,13 @@ fun RoadCanvas(allDirections: List<List<List<Point>>>) {
                             color = if (int == 0) Color.Blue else Color.Red, // Color.Black,
                             start =
                                 Offset(
-                                    size.width / 2 + roads[i].x.toFloat(),
-                                    size.height / 2 - roads[i].y.toFloat(),
+                                    roads[i].x.toFloat(),
+                                    size.height - roads[i].y.toFloat(),
                                 ),
                             end =
                                 Offset(
-                                    size.width / 2 + roads[i + 1].x.toFloat(),
-                                    size.height / 2 - roads[i + 1].y.toFloat(),
+                                    +roads[i + 1].x.toFloat(),
+                                    size.height - roads[i + 1].y.toFloat(),
                                 ),
                             strokeWidth = roadWidth,
                             cap = StrokeCap.Round,
@@ -40,13 +40,13 @@ fun RoadCanvas(allDirections: List<List<List<Point>>>) {
                             color = Color.White,
                             start =
                                 Offset(
-                                    size.width / 2 + (direction[i][j].x.toFloat() + direction[i + 1][j].x.toFloat()) / 2,
-                                    size.height / 2 - (direction[i][j].y.toFloat() + direction[i + 1][j].y.toFloat()) / 2,
+                                    +(direction[i][j].x.toFloat() + direction[i + 1][j].x.toFloat()) / 2,
+                                    size.height - (direction[i][j].y.toFloat() + direction[i + 1][j].y.toFloat()) / 2,
                                 ),
                             end =
                                 Offset(
-                                    size.width / 2 + (direction[i][j + 1].x.toFloat() + direction[i + 1][j + 1].x.toFloat()) / 2,
-                                    size.height / 2 - (direction[i][j + 1].y.toFloat() + direction[i + 1][j + 1].y.toFloat()) / 2,
+                                    +(direction[i][j + 1].x.toFloat() + direction[i + 1][j + 1].x.toFloat()) / 2,
+                                    size.height - (direction[i][j + 1].y.toFloat() + direction[i + 1][j + 1].y.toFloat()) / 2,
                                 ),
                             strokeWidth = 5f,
                             cap = StrokeCap.Butt,

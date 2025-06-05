@@ -8,17 +8,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import model.Point
+import model.TrafficLight
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun TrafficLightCanvas(trafficsLights: List<Pair<Point, Int>>) {
+fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
     val textMeasurer = rememberTextMeasurer()
     Canvas(modifier = Modifier.fillMaxSize()) {
-        for ((point, trafficLight) in trafficsLights) {
+        for (trafficLight in trafficsLights) {
             drawCircle(
                 color =
-                    when (trafficLight) {
+                    when (trafficLight.state) {
                         0 -> {
                             Color.Green
                         }
@@ -34,8 +34,8 @@ fun TrafficLightCanvas(trafficsLights: List<Pair<Point, Int>>) {
                 radius = 50f,
                 center =
                     Offset(
-                        x = size.width / 2 + point.x.toFloat(),
-                        y = size.height / 2 - point.y.toFloat(),
+                        x = trafficLight.position.x.toFloat(),
+                        y = size.height - trafficLight.position.y.toFloat(),
                     ),
             )
             drawText(
@@ -43,8 +43,8 @@ fun TrafficLightCanvas(trafficsLights: List<Pair<Point, Int>>) {
                 text = "Hello World",
                 topLeft =
                     Offset(
-                        x = size.width / 2 + point.x.toFloat() - 50f, // Adjusted to center text horizontally
-                        y = size.height / 2 - point.y.toFloat() - 80f, // Adjusted to position text above the circle
+                        x = trafficLight.position.x.toFloat() - 50f, // Adjusted to center text horizontally
+                        y = size.height - trafficLight.position.y.toFloat() - 80f, // Adjusted to position text above the circle
                     ),
             )
         }
