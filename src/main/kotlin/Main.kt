@@ -42,7 +42,7 @@ fun App(
             RoadCanvas(
                 road.map { direction -> direction.roads.map { road -> road } },
             )
-            JunctionCanvas(junctions)
+            JunctionCanvas(junctions.map { it.position })
             TrafficLightCanvas(trafficLight)
             CarCanvas(cars)
         }

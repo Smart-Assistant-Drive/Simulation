@@ -20,8 +20,8 @@ fun JunctionCanvas(points: List<Point>) {
                 brush = SolidColor(Color.Black),
                 topLeft =
                     Offset(
-                        x = point.x.toFloat() - 10f,
-                        y = size.height - point.y.toFloat() - 10f,
+                        x = point.x.toFloat() - distance / 4 - 10f,
+                        y = size.height - point.y.toFloat() - distance / 2 - 10f,
                     ),
                 size =
                     androidx.compose.ui.geometry

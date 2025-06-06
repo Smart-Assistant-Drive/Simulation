@@ -11,6 +11,7 @@ data class Car(
     val lineIndex: Int = 0, // Line index on the road
     val reachPointIndex: Int = 0, // Index of the closest point on the road not yet reached
     val changingLineTo: Int? = null, // Index of the line to change to, if any
+    val changingDirectionTo: Int? = null,
 ) {
     fun move(): Car {
         val newX = position.x + speed * direction.x
@@ -43,4 +44,6 @@ data class Car(
     fun setClosesPointIndex(closesPointIndex: Int): Car = this.copy(reachPointIndex = closesPointIndex)
 
     fun changeLineTo(lineIndex: Int?): Car = this.copy(changingLineTo = lineIndex)
+
+    fun changeDirectionTo(directionIndex: Int?): Car = this.copy(changingDirectionTo = directionIndex)
 }

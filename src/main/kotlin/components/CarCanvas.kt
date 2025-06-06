@@ -11,7 +11,7 @@ import model.domain.Car
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-fun CarCanvas(cars: List<Car>) {
+fun CarCanvas(cars: Set<Car>) {
     val carWidth = 20f
     val carHeight = 40f
     Canvas(modifier = Modifier.fillMaxSize()) {

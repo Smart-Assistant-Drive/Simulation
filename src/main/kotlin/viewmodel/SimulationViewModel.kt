@@ -11,6 +11,8 @@ import kotlinx.coroutines.withContext
 import model.domain.Car
 import model.domain.Direction
 import model.domain.DirectionFactory
+import model.domain.Junction
+import model.domain.JunctionConnection
 import model.domain.RoadUtilities
 import model.domain.TrafficLight
 import model.math.Point
@@ -20,13 +22,13 @@ class SimulationViewModel {
     private val _roadMap = MutableStateFlow<List<Direction>>(listOf())
     val roadMap: StateFlow<List<Direction>> = _roadMap.asStateFlow()
 
-    private val _junctions = MutableStateFlow<List<Point>>(listOf())
-    val junctions: StateFlow<List<Point>> = _junctions.asStateFlow()
+    private val _junctions = MutableStateFlow<Set<Junction>>(setOf())
+    val junctions: StateFlow<Set<Junction>> = _junctions.asStateFlow()
 
     private val _trafficLight = MutableStateFlow<List<TrafficLight>>(listOf())
     val trafficLight = _trafficLight // Expose as read-only
-    private val _cars = MutableStateFlow(listOf<Car>(Car(Point(0.0, 0.0))))
-    val cars: StateFlow<List<Car>> = _cars.asStateFlow()
+    private val _cars = MutableStateFlow(setOf(Car(Point(0.0, 0.0))))
+    val cars: StateFlow<Set<Car>> = _cars.asStateFlow()
 
     suspend fun getRoadMap() {
         // Simulate a network or database call
@@ -34,7 +36,7 @@ class SimulationViewModel {
         val initialY = 100
         val endX = 2000
         val endY = 1000
-        val step = 100
+        val step = 50
         val distance = 100
         val points1 =
             (0..4)
@@ -102,14 +104,14 @@ class SimulationViewModel {
                     }
                 }.flatten()
 
-        val middleX = (initialX + endX) / 2 - distance / 4
+        val middleX = (initialX + endX) / 2
         val points3 =
             (initialY..endY step step).map {
-                Point(middleX.toDouble(), it.toDouble())
+                Point(middleX.toDouble() + distance / 4, it.toDouble())
             }
         val points4 =
             (endY downTo initialY step step).map {
-                Point(middleX.toDouble() + distance / 2, it.toDouble())
+                Point(middleX.toDouble() - distance / 4, it.toDouble())
             }
 
         val directionsData =
@@ -122,8 +124,14 @@ class SimulationViewModel {
 
         val junctions =
             listOf(
-                Point(middleX.toDouble(), initialY.toDouble() + distance),
-                Point(middleX.toDouble(), endY.toDouble()),
+                Junction(
+                    Point(middleX.toDouble(), initialY.toDouble() + distance / 2),
+                    calculateConnection(directionsData, Point(middleX.toDouble(), initialY.toDouble() + distance)).toSet(),
+                ),
+                Junction(
+                    Point(middleX.toDouble(), endY.toDouble() - distance / 2),
+                    calculateConnection(directionsData, Point(middleX.toDouble(), endY.toDouble() + distance)).toSet(),
+                ),
             )
 
         val trafficLight =
@@ -131,27 +139,27 @@ class SimulationViewModel {
                 .mapIndexed { i, j ->
                     (0..2).map {
                         when (it) {
-                            0 -> TrafficLight(Point(j.x + 1.25 * distance, j.y - distance / 2), 0) // Green
+                            0 -> TrafficLight(Point(j.position.x + distance, j.position.y), 0) // Green
                             1 ->
                                 TrafficLight(
                                     Point(
-                                        j.x + distance / 4,
+                                        j.position.x,
                                         if (i % 2 == 0) {
-                                            j.y + distance.toDouble() - distance / 2
+                                            j.position.y + distance.toDouble() + 0.25 * distance
                                         } else {
-                                            j.y - distance.toDouble() - distance / 2
+                                            j.position.y - distance.toDouble() - 0.25 * distance
                                         },
                                     ),
                                     1,
                                 ) // Yellow
-                            else -> TrafficLight(Point(j.x - 0.75 * distance, j.y - distance / 2), 0) // Red
+                            else -> TrafficLight(Point(j.position.x - distance, j.position.y), 0) // Red
                         }
                     }
                 }.flatten()
 
         withContext(Dispatchers.Main) {
             _roadMap.value = directionsData
-            _junctions.value = junctions
+            _junctions.value = junctions.toSet()
             _trafficLight.value = trafficLight
         }
     }
@@ -169,28 +177,29 @@ class SimulationViewModel {
     suspend fun createCars(cars: Int) {
         val speed = 10 // Set a default speed for the cars
         val newCars =
-            (0..cars - 1).map {
-                val directionIndex = (0..1).random() // Randomly choose a direction
-                val road = _roadMap.value[directionIndex].roads[0] // Get the first direction
-                val roadPoints = road.size
-                val pointIndex = (0 until roadPoints).random() // Randomly choose a point on the road
-                val point = road[pointIndex]
-                val nextPointIndex = (pointIndex + 1) % roadPoints // Wrap around to the start if at the end
-                val direction =
-                    Vector2D
-                        .fromPoints(
-                            point,
-                            road[nextPointIndex], // Wrap around to the start if at the end
-                        ).normalize() // Get the direction vector from the point to the next point)
-                Car(
-                    point,
-                    speed,
-                    direction,
-                    directionIndex,
-                    0,
-                    nextPointIndex,
-                ) // Create a car with a random point and fixed speed
-            }
+            (0..cars - 1)
+                .map {
+                    val directionIndex = (0..1).random() // Randomly choose a direction
+                    val road = _roadMap.value[directionIndex].roads[0] // Get the first direction
+                    val roadPoints = road.size
+                    val pointIndex = (0 until roadPoints).random() // Randomly choose a point on the road
+                    val point = road[pointIndex]
+                    val nextPointIndex = (pointIndex + 1) % roadPoints // Wrap around to the start if at the end
+                    val direction =
+                        Vector2D
+                            .fromPoints(
+                                point,
+                                road[nextPointIndex], // Wrap around to the start if at the end
+                            ).normalize() // Get the direction vector from the point to the next point
+                    Car(
+                        point,
+                        speed,
+                        direction,
+                        directionIndex,
+                        0,
+                        nextPointIndex,
+                    ) // Create a car with a random point and fixed speed
+                }.toSet()
         withContext(Dispatchers.Main) {
             _cars.value = newCars // Update the state flow on the main thread.
         }
@@ -215,12 +224,16 @@ class SimulationViewModel {
             while (true) {
                 delay(100) // Delay for 1 second
                 val newCars =
-                    _cars.value.map { car ->
-                        RoadUtilities.carMoveSafety(
-                            car,
-                            _roadMap.value,
-                        ) // Move the car safely along the road
-                    }
+                    _cars.value
+                        .map { car ->
+                            RoadUtilities.carMoveSafety(
+                                car,
+                                _roadMap.value,
+                                _junctions.value,
+                            ) // Move the car safely along the road
+                        }.map { car ->
+                            RoadUtilities.changeDirection(car, _junctions.value) // Change the direction of the car if needed
+                        }.toSet()
 
                 withContext(Dispatchers.Main) {
                     _cars.value = newCars // Update the state flow on the main thread.
@@ -234,16 +247,36 @@ class SimulationViewModel {
             while (true) {
                 delay(5000) // Delay for 1 second
                 val newCars =
-                    _cars.value.map { car ->
-                        RoadUtilities.changeLine(
-                            car,
-                            _roadMap.value,
-                        ) // Change the line of the car
-                    }
+                    _cars.value
+                        .map { car ->
+                            RoadUtilities.changeLine(
+                                car,
+                                _roadMap.value,
+                            ) // Change the line of the car
+                        }.toSet()
                 withContext(Dispatchers.Main) {
                     _cars.value = newCars // Update the state flow on the main thread.
                 }
             }
         }
     }
+
+    fun calculateConnection(
+        directions: List<Direction>,
+        junction: Point,
+    ): List<JunctionConnection> =
+        directions.mapIndexed { index, direction ->
+            val closestPoint =
+                direction.roads[0].minBy { point ->
+                    Vector2D.fromPoints(point, junction).magnitude()
+                }
+            val closestPointIndex = direction.roads[0].indexOf(closestPoint)
+            JunctionConnection(
+                index,
+                closestPointIndex,
+                closestPoint,
+                closestPointIndex > 3,
+                closestPointIndex < direction.roads[0].size - 3,
+            )
+        }
 }
