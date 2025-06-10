@@ -43,8 +43,8 @@ fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
                 text = "Hello World",
                 topLeft =
                     Offset(
-                        x = trafficLight.position.x.toFloat() - 50f, // Adjusted to center text horizontally
-                        y = size.height - trafficLight.position.y.toFloat() - 80f, // Adjusted to position text above the circle
+                        x = trafficLight.position.x.toFloat() - 50f,
+                        y = size.height - trafficLight.position.y.toFloat() - 80f,
                     ),
             )
         }

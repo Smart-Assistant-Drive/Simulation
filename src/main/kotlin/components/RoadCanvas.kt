@@ -46,7 +46,11 @@ fun RoadCanvas(allDirections: List<List<List<Point>>>) {
                             end =
                                 Offset(
                                     +(direction[i][j + 1].x.toFloat() + direction[i + 1][j + 1].x.toFloat()) / 2,
-                                    size.height - (direction[i][j + 1].y.toFloat() + direction[i + 1][j + 1].y.toFloat()) / 2,
+                                    size.height -
+                                        (
+                                            direction[i][j + 1].y.toFloat() +
+                                                direction[i + 1][j + 1].y.toFloat()
+                                        ) / 2,
                                 ),
                             strokeWidth = 5f,
                             cap = StrokeCap.Butt,
