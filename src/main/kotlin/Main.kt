@@ -17,9 +17,6 @@ import components.CarCanvas
 import components.JunctionCanvas
 import components.TrafficLightCanvas
 import components.TrafficSignCanvas
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import viewmodel.SimulationViewModel
 
 @Composable
@@ -51,7 +48,6 @@ fun App(mainViewModel: SimulationViewModel) {
 
 fun main() {
     application {
-        val applicationScope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Main) }
         Window(
             onCloseRequest = ::exitApplication,
             title = "Compose Multiplatform App",
