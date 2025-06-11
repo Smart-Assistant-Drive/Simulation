@@ -15,6 +15,7 @@ import model.domain.Junction
 import model.domain.JunctionConnection
 import model.domain.RoadUtilities
 import model.domain.TrafficLight
+import model.domain.TrafficSign
 import model.math.Point
 import model.math.Vector2D
 
@@ -29,6 +30,8 @@ class SimulationViewModel {
     val trafficLight = _trafficLight // Expose as read-only
     private val _cars = MutableStateFlow(setOf(Car(Point(0.0, 0.0))))
     val cars: StateFlow<Set<Car>> = _cars.asStateFlow()
+    private val _trafficSigns = MutableStateFlow<Set<TrafficSign>>(setOf())
+    val trafficSigns: StateFlow<Set<TrafficSign>> = _trafficSigns.asStateFlow()
 
     suspend fun getRoadMap() {
         // Simulate a network or database call
@@ -157,10 +160,17 @@ class SimulationViewModel {
                     }
                 }.flatten()
 
+        val trafficSigns =
+            setOf(
+                TrafficSign(Point(100.0, 100.0), "stop"),
+                TrafficSign(Point(200.0, 200.0), "yield"),
+            )
+
         withContext(Dispatchers.Main) {
             _roadMap.value = directionsData
             _junctions.value = junctions.toSet()
             _trafficLight.value = trafficLight
+            _trafficSigns.value = trafficSigns // Update the state flow on the main thread.
         }
     }
 

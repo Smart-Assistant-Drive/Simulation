@@ -16,6 +16,7 @@ import androidx.compose.ui.window.rememberWindowState
 import components.CarCanvas
 import components.JunctionCanvas
 import components.TrafficLightCanvas
+import components.TrafficSignCanvas
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,14 +25,12 @@ import viewmodel.SimulationViewModel
 @Composable
 @Preview
 @Suppress("FunctionName")
-fun App(
-    mainViewModel: SimulationViewModel,
-    applicationScope: CoroutineScope,
-) {
+fun App(mainViewModel: SimulationViewModel) {
     val road by mainViewModel.roadMap.collectAsState() // Collect the StateFlow
     val junctions by mainViewModel.junctions.collectAsState() // Collect the StateFlow
     val trafficLight by mainViewModel.trafficLight.collectAsState() // Collect the StateFlow
     val cars by mainViewModel.cars.collectAsState() // Collect the StateFlow
+    val trafficSigns by mainViewModel.trafficSigns.collectAsState() // Collect the StateFlow
     mainViewModel.startSimulation(1)
     Scaffold(
         topBar = {
@@ -45,6 +44,7 @@ fun App(
             JunctionCanvas(junctions.map { it.position })
             TrafficLightCanvas(trafficLight)
             CarCanvas(cars)
+            TrafficSignCanvas(trafficSigns) // Example traffic sign
         }
     }
 }
@@ -59,7 +59,7 @@ fun main() {
         ) {
             // Create and pass the MainViewModel directly.
             val mainViewModel = remember { SimulationViewModel() }
-            App(mainViewModel, applicationScope)
+            App(mainViewModel)
         }
     }
 }
