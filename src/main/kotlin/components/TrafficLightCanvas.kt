@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import model.domain.TrafficLight
+import model.domain.TrafficLightState
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -19,11 +20,11 @@ fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
             drawCircle(
                 color =
                     when (trafficLight.state) {
-                        0 -> {
+                        TrafficLightState.GREEN -> {
                             Color.Green
                         }
 
-                        1 -> {
+                        TrafficLightState.YELLOW -> {
                             Color.Yellow
                         }
 

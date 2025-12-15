@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.qa)
     alias(libs.plugins.dokka)
     alias(libs.plugins.taskTree)
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 group = "org.example"
@@ -44,6 +45,10 @@ dependencies {
     implementation(compose.materialIconsExtended)
     implementation("org.jetbrains.compose.desktop:desktop:1.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3") // Or the latest version
+    implementation(libs.bundles.ktor.client)
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
     testImplementation(kotlin("test"))
 }
 

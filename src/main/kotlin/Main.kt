@@ -25,7 +25,7 @@ import viewmodel.SimulationViewModel
 fun App(mainViewModel: SimulationViewModel) {
     val road by mainViewModel.roadMap.collectAsState() // Collect the StateFlow
     val junctions by mainViewModel.junctions.collectAsState() // Collect the StateFlow
-    val trafficLight by mainViewModel.trafficLight.collectAsState() // Collect the StateFlow
+    val trafficLights by mainViewModel.trafficLights.collectAsState() // Collect the StateFlow
     val cars by mainViewModel.cars.collectAsState() // Collect the StateFlow
     val trafficSigns by mainViewModel.trafficSigns.collectAsState() // Collect the StateFlow
     mainViewModel.startSimulation(1)
@@ -39,7 +39,7 @@ fun App(mainViewModel: SimulationViewModel) {
                 road.map { direction -> direction.roads.map { road -> road } },
             )
             JunctionCanvas(junctions.map { it.position })
-            TrafficLightCanvas(trafficLight)
+            TrafficLightCanvas(trafficLights)
             CarCanvas(cars)
             TrafficSignCanvas(trafficSigns) // Example traffic sign
         }

@@ -4,10 +4,14 @@ import model.math.Point
 
 data class TrafficLight(
     val position: Point,
-    val state: Int = 0, // 0: Green, 1: Yellow, 2: Red
+    val id: String,
+    val state: TrafficLightState, // 0: Green, 1: Yellow, 2: Red
 ) {
-    fun changeState(): TrafficLight {
-        val state = (state + 1) % 3 // Cycle through states
-        return TrafficLight(position, state)
-    }
+    fun changeState(state: TrafficLightState): TrafficLight = TrafficLight(position, id, state)
+}
+
+enum class TrafficLightState {
+    GREEN,
+    YELLOW,
+    RED,
 }

@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import model.domain.Car
 import model.domain.Direction
-import model.domain.DirectionFactory
 import model.domain.Junction
 import model.domain.JunctionConnection
 import model.domain.RoadUtilities
@@ -18,6 +17,9 @@ import model.domain.TrafficLight
 import model.domain.TrafficSign
 import model.math.Point
 import model.math.Vector2D
+import repository.RemoteRepository
+import repository.RemoteStream
+import viewmodel.mapper.Mapper.convert
 
 class SimulationViewModel {
     private val _roadMap = MutableStateFlow<List<Direction>>(listOf())
@@ -26,13 +28,14 @@ class SimulationViewModel {
     private val _junctions = MutableStateFlow<Set<Junction>>(setOf())
     val junctions: StateFlow<Set<Junction>> = _junctions.asStateFlow()
 
-    private val _trafficLight = MutableStateFlow<List<TrafficLight>>(listOf())
-    val trafficLight = _trafficLight // Expose as read-only
+    private val _trafficLights = MutableStateFlow<List<TrafficLight>>(listOf())
+    val trafficLights = _trafficLights // Expose as read-only
     private val _cars = MutableStateFlow(setOf(Car(Point(0.0, 0.0))))
     val cars: StateFlow<Set<Car>> = _cars.asStateFlow()
     private val _trafficSigns = MutableStateFlow<Set<TrafficSign>>(setOf())
     val trafficSigns: StateFlow<Set<TrafficSign>> = _trafficSigns.asStateFlow()
 
+    /*
     suspend fun getRoadMap() {
         // Simulate a network or database call
         val initialX = 100
@@ -45,32 +48,39 @@ class SimulationViewModel {
             (0..4)
                 .map { i ->
                     when (i) {
-                        0 ->
+                        0 -> {
                             (initialY + step downTo initialY + step step step).map {
                                 Point(initialX.toDouble(), it.toDouble())
                             }
+                        }
 
-                        1 ->
+                        1 -> {
                             (initialX..endX - step step step).map {
                                 Point(it.toDouble(), initialY.toDouble())
                             }
+                        }
 
-                        2 ->
+                        2 -> {
                             (initialY..endY - step step step).map {
                                 Point(endX.toDouble(), it.toDouble())
                             }
+                        }
 
-                        3 ->
+                        3 -> {
                             (endX downTo initialX + step step step).map {
                                 Point(it.toDouble(), endY.toDouble())
                             }
+                        }
 
-                        4 ->
+                        4 -> {
                             (endY downTo initialY + step step step).map {
                                 Point(initialX.toDouble(), it.toDouble())
                             }
+                        }
 
-                        else -> emptyList()
+                        else -> {
+                            emptyList()
+                        }
                     }
                 }.flatten()
 
@@ -78,32 +88,39 @@ class SimulationViewModel {
             (0..4)
                 .map { i ->
                     when (i) {
-                        0 ->
+                        0 -> {
                             (endY - step - distance..endY - step - distance step step).map {
                                 Point(initialX.toDouble() + distance, it.toDouble())
                             }
+                        }
 
-                        1 ->
+                        1 -> {
                             (initialX + distance..endX - step - distance step step).map {
                                 Point(it.toDouble(), endY.toDouble() - distance)
                             }
+                        }
 
-                        2 ->
+                        2 -> {
                             (endY - distance downTo initialY + step + distance step step).map {
                                 Point(endX.toDouble() - distance, it.toDouble())
                             }
+                        }
 
-                        3 ->
+                        3 -> {
                             (endX - distance downTo initialX + step + distance step step).map {
                                 Point(it.toDouble(), initialY.toDouble() + distance)
                             }
+                        }
 
-                        4 ->
+                        4 -> {
                             (initialY + distance..endY - distance - step step step).map {
                                 Point(initialX.toDouble() + distance, it.toDouble())
                             }
+                        }
 
-                        else -> emptyList()
+                        else -> {
+                            emptyList()
+                        }
                     }
                 }.flatten()
 
@@ -142,8 +159,12 @@ class SimulationViewModel {
                 .mapIndexed { i, j ->
                     (0..2).map {
                         when (it) {
-                            0 -> TrafficLight(Point(j.position.x + distance, j.position.y), 0) // Green
-                            1 ->
+                            0 -> {
+                                TrafficLight(Point(j.position.x + distance, j.position.y), "1", TrafficLightState.GREEN)
+                            }
+
+                            // Green
+                            1 -> {
                                 TrafficLight(
                                     Point(
                                         j.position.x,
@@ -153,9 +174,15 @@ class SimulationViewModel {
                                             j.position.y - distance.toDouble() - 0.25 * distance
                                         },
                                     ),
-                                    1,
-                                ) // Yellow
-                            else -> TrafficLight(Point(j.position.x - distance, j.position.y), 0) // Red
+                                    "1",
+                                    TrafficLightState.YELLOW,
+                                )
+                            }
+
+                            // Yellow
+                            else -> {
+                                TrafficLight(Point(j.position.x - distance, j.position.y), "1", TrafficLightState.RED)
+                            } // Red
                         }
                     }
                 }.flatten()
@@ -169,25 +196,47 @@ class SimulationViewModel {
         withContext(Dispatchers.Main) {
             _roadMap.value = directionsData
             _junctions.value = junctions.toSet()
-            _trafficLight.value = trafficLight
+            _trafficLights.value = trafficLight
             _trafficSigns.value = trafficSigns // Update the state flow on the main thread.
         }
+    }
+     */
+
+    suspend fun getRoadMap() {
+        val repository = RemoteRepository()
+        val roads = repository.getRoadsId()
+        val directionsData =
+            roads.flatMap { roadId ->
+                // val road = repository.getRoad(roadId)
+                return@flatMap repository.getFlows(roadId)
+            }
+        _roadMap.value = directionsData.map { it.convert() }
+        val trafficLight =
+            directionsData.flatMap { direction ->
+                repository.getTrafficLights(direction.roadId, direction.flowId)
+            }
+        _trafficLights.value = trafficLight.map { it.convert() }
+        val signs =
+            directionsData.flatMap { direction ->
+                repository.getSigns(direction.roadId, direction.flowId).signs
+            }
+        _trafficSigns.value = signs.map { it.convert() }.toSet()
     }
 
     fun startSimulation(cars: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             getRoadMap()
-            createCars(cars)
+            // createCars(cars)
             startTrafficLight()
-            startCars()
-            changeLine()
+            // startCars()
+            // changeLine()
         }
     }
 
     suspend fun createCars(cars: Int) {
         val speed = 10 // Set a default speed for the cars
         val newCars =
-            (0..cars - 1)
+            (0..<cars)
                 .map {
                     val directionIndex = (0..1).random() // Randomly choose a direction
                     val road = _roadMap.value[directionIndex].roads[0] // Get the first direction
@@ -216,14 +265,18 @@ class SimulationViewModel {
     }
 
     fun startTrafficLight() {
+        val remoteStream = RemoteStream()
+
         CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                delay(2000) // Delay for 1 second
-                withContext(Dispatchers.Main) {
-                    _trafficLight.value =
-                        _trafficLight.value.map { trafficLight ->
-                            trafficLight.changeState()
-                        } // Update the state flow on the main thread.
+            _trafficLights.value.forEach { trafficLight ->
+
+                // Launch a coroutine for each traffic light stream
+                launch {
+                    remoteStream
+                        .trafficLightStateStream(trafficLight.id)
+                        .collect { newState ->
+                            trafficLight.changeState(newState)
+                        }
                 }
             }
         }
