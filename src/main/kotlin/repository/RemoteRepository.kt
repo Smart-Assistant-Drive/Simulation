@@ -34,8 +34,8 @@ class RemoteRepository(
             }
         }
 
-    suspend fun getRoadsId(): List<String> {
-        val response: HttpResponse = client.get("$brokerAdministration/roads_id")
+    suspend fun getRoads(): List<RoadResponseDto> {
+        val response: HttpResponse = client.get("$brokerAdministration/roads")
         return response.body()
     }
 

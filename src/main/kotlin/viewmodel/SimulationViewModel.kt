@@ -204,11 +204,11 @@ class SimulationViewModel {
 
     suspend fun getRoadMap() {
         val repository = RemoteRepository()
-        val roads = repository.getRoadsId()
+        val roads = repository.getRoads()
         val directionsData =
-            roads.flatMap { roadId ->
+            roads.flatMap { road ->
                 // val road = repository.getRoad(roadId)
-                return@flatMap repository.getFlows(roadId)
+                return@flatMap repository.getFlows(road.roadId)
             }
         _roadMap.value = directionsData.map { it.convert() }
         val trafficLight =
