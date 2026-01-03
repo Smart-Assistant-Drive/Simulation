@@ -23,7 +23,13 @@ fun TrafficSignCanvas(trafficSigns: Set<TrafficSign>) {
                 useResource(
                     when (sign.signType) {
                         "stop" -> "stop.jpg"
+
                         "yield" -> "yield.png"
+
+                        "MaximumSpeedLimitSign_50" -> "speed_limit_50.png"
+
+                        "MaximumSpeedLimitSign_30" -> "speed_limit_30.png"
+
                         // "speed_limit" -> "images/speed_limit_sign.png"
                         else -> "stop.jpg"
                     },
