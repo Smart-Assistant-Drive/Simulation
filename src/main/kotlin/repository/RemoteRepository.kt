@@ -7,7 +7,6 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 import io.ktor.serialization.jackson.jackson
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule
@@ -17,8 +16,8 @@ import repository.dto.SemaphoreDto
 import repository.dto.SignsResponseDto
 
 class RemoteRepository(
-    val brokerAdministration: String = "http://localhost:8080",
-    val brokerPublic: String = "http://localhost:8081",
+    val brokerAdministration: String = "http://localhost:8087",
+    // val brokerPublic: String = "http://localhost:8086",
 ) {
     val mapper: ObjectMapper =
         ObjectMapper()
@@ -40,12 +39,12 @@ class RemoteRepository(
     }
 
     suspend fun getRoad(roadId: String): RoadResponseDto {
-        val response: HttpResponse = client.get("$brokerPublic/road/$roadId")
+        val response: HttpResponse = client.get("$brokerAdministration/road/$roadId")
         return response.body()
     }
 
     suspend fun getFlows(roadId: String): List<DrivingFlowResponseDto> {
-        val response: HttpResponse = client.get("$brokerPublic/flows/$roadId")
+        val response: HttpResponse = client.get("$brokerAdministration/flows/$roadId")
         return response.body()
     }
 
@@ -54,10 +53,7 @@ class RemoteRepository(
         direction: String,
     ): List<SemaphoreDto> {
         val response: HttpResponse =
-            client.get("$brokerPublic/semaphores/filter") {
-                parameter("road", roadId)
-                parameter("direction", direction)
-            }
+            client.get("$brokerAdministration/semaphores/$roadId/$direction")
         return response.body()
     }
 
@@ -65,7 +61,7 @@ class RemoteRepository(
         roadId: String,
         direction: String,
     ): SignsResponseDto {
-        val response: HttpResponse = client.get("$brokerPublic/signs/$roadId/$direction")
+        val response: HttpResponse = client.get("$brokerAdministration/signs/$roadId/$direction")
         return response.body()
     }
 }

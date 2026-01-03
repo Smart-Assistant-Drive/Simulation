@@ -10,8 +10,8 @@ import repository.dto.SignResponseDto
 object Mapper {
     fun DrivingFlowResponseDto.convert(): Direction =
         model.domain.DirectionFactory.createDirection(
-            this.coordinates.map {
-                model.math.Point(it.first.toDouble(), it.second.toDouble())
+            this.roadCoordinates.map {
+                model.math.Point(it.x.toDouble(), it.y.toDouble())
             },
             this.numOfLanes,
         )
@@ -19,7 +19,7 @@ object Mapper {
     fun SemaphoreDto.convert(): TrafficLight =
         TrafficLight(
             position = model.math.Point(this.positionDto.x.toDouble(), this.positionDto.y.toDouble()),
-            id = this.idIndex.toString(),
+            id = this.id,
             state = model.domain.TrafficLightState.RED,
         )
 
