@@ -6,6 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import model.domain.Car
@@ -17,6 +18,7 @@ import model.domain.TrafficLight
 import model.domain.TrafficSign
 import model.math.Point
 import model.math.Vector2D
+import repository.MqttRepository
 import repository.RemoteRepository
 import repository.RemoteStream
 import viewmodel.mapper.Mapper.convert
@@ -208,26 +210,31 @@ class SimulationViewModel {
         val directionsData =
             roads.flatMap { road ->
                 // val road = repository.getRoad(roadId)
-                return@flatMap repository.getFlows(road.roadId)
+                val tmp = repository.getFlows(road.roadNumber)
+                return@flatMap tmp
             }
         _roadMap.value = directionsData.map { it.convert() }
         val trafficLight =
             directionsData.flatMap { direction ->
-                repository.getTrafficLights(direction.roadId, direction.flowId)
+                repository.getTrafficLights(direction.roadId, direction.idDirection.toString())
             }
         _trafficLights.value = trafficLight.map { it.convert() }
         val signs =
             directionsData.flatMap { direction ->
-                repository.getSigns(direction.roadId, direction.flowId).signs
+                repository.getSigns(direction.roadId, direction.idDirection.toString()).signs
             }
         _trafficSigns.value = signs.map { it.convert() }.toSet()
     }
 
+    private var started = false
+
     fun startSimulation(cars: Int) {
+        if (started) return
+        started = true
         CoroutineScope(Dispatchers.IO).launch {
             getRoadMap()
             // createCars(cars)
-            startTrafficLight()
+            startTrafficLight(CoroutineScope(Dispatchers.IO))
             // startCars()
             // changeLine()
         }
@@ -264,20 +271,25 @@ class SimulationViewModel {
         }
     }
 
-    fun startTrafficLight() {
+    fun startTrafficLight(scope: CoroutineScope) {
         val remoteStream = RemoteStream()
+        val mqttRepository = MqttRepository()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            _trafficLights.value.forEach { trafficLight ->
-
-                // Launch a coroutine for each traffic light stream
-                launch {
-                    remoteStream
-                        .trafficLightStateStream(trafficLight.id)
-                        .collect { newState ->
-                            trafficLight.changeState(newState)
+        _trafficLights.value.forEach { trafficLight ->
+            scope.launch(Dispatchers.IO) {
+                remoteStream
+                    .trafficLightStateStream(trafficLight.id, mqttRepository)
+                    .collect { newState ->
+                        _trafficLights.update { list ->
+                            list.map {
+                                if (it.id == trafficLight.id) {
+                                    it.changeState(newState)
+                                } else {
+                                    it
+                                }
+                            }
                         }
-                }
+                    }
             }
         }
     }
