@@ -5,6 +5,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,7 +29,9 @@ fun App(mainViewModel: SimulationViewModel) {
     val trafficLights by mainViewModel.trafficLights.collectAsState() // Collect the StateFlow
     val cars by mainViewModel.cars.collectAsState() // Collect the StateFlow
     val trafficSigns by mainViewModel.trafficSigns.collectAsState() // Collect the StateFlow
-    mainViewModel.startSimulation(1)
+    LaunchedEffect(Unit) {
+        mainViewModel.startSimulation(1)
+    }
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Compose Multiplatform App") })

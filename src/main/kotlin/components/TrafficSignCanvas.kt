@@ -15,9 +15,10 @@ import model.domain.TrafficSign
 @Suppress("ktlint:standard:function-naming", "DEPRECATION")
 @Composable
 fun TrafficSignCanvas(trafficSigns: Set<TrafficSign>) {
-    val signSize = 80f // All signs will be this size
+    // val signSize = 80f // All signs will be this size
 
     Canvas(modifier = Modifier.fillMaxSize()) {
+        val signSize = 0.05f * size.minDimension
         for (sign in trafficSigns) {
             val bitmap =
                 useResource(

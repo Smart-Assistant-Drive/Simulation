@@ -16,6 +16,7 @@ import model.domain.TrafficLightState
 fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
     val textMeasurer = rememberTextMeasurer()
     Canvas(modifier = Modifier.fillMaxSize()) {
+        val radius = 0.03f * size.minDimension
         for (trafficLight in trafficsLights) {
             drawCircle(
                 color =
@@ -32,7 +33,7 @@ fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
                             Color.Red
                         }
                     },
-                radius = 50f,
+                radius = radius,
                 center =
                     Offset(
                         x = trafficLight.position.x.toFloat(),
@@ -41,11 +42,11 @@ fun TrafficLightCanvas(trafficsLights: List<TrafficLight>) {
             )
             drawText(
                 textMeasurer = textMeasurer,
-                text = "Hello World",
+                text = trafficLight.id,
                 topLeft =
                     Offset(
-                        x = trafficLight.position.x.toFloat() - 50f,
-                        y = size.height - trafficLight.position.y.toFloat() - 80f,
+                        x = trafficLight.position.x.toFloat() - radius,
+                        y = size.height - trafficLight.position.y.toFloat() - radius,
                     ),
             )
         }
