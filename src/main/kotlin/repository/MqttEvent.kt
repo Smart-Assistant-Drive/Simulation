@@ -1,4 +1,4 @@
-package repository.dto
+package repository
 
 data class MqttEvent(
     val topic: String,

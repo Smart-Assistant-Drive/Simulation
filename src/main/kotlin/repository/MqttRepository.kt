@@ -15,7 +15,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import repository.dto.MqttEvent
+import repository.MqttEvent
 
 class MqttRepository(
     brokerUrl: String = "tcp://127.0.0.1:1883",
