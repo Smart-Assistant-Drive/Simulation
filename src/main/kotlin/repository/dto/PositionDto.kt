@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PositionDto(
-    @param:JsonProperty("x") val x: Float,
-    @param:JsonProperty("y") val y: Float,
+    @param:JsonProperty("first") val x: Float,
+    @param:JsonProperty("second") val y: Float,
 )

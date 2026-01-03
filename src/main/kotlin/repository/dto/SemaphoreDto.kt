@@ -8,12 +8,15 @@ class SemaphoreDto(
     @param:JsonProperty("link") var link: String,
     @param:JsonProperty("road") var road: String,
     @param:JsonProperty("direction") var direction: Int,
-    @param:JsonProperty("position") var positionDto: PositionDto,
+    @param:JsonProperty("position") var positionDto: CoordinateDto,
+    @param:JsonProperty("status") var status: String,
+    @param:JsonProperty("id") var id: String,
+    @param:JsonProperty("idIndex") var idIndex: Int,
 ) {
     companion object {
         const val READY = "ready"
         const val OFFLINE = "offline"
     }
 
-    var idIndex = 0
+    // var idIndex = 0
 }

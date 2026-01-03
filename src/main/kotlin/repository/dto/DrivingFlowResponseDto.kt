@@ -21,7 +21,7 @@ class DrivingFlowResponseDto
         /**
          *
          */
-        @param:JsonProperty("direction") val direction: Int,
+        @param:JsonProperty("idDirection") val idDirection: Int,
         /**
          *
          */
@@ -29,5 +29,5 @@ class DrivingFlowResponseDto
         /**
          *
          */
-        @param:JsonProperty("coordinates") val coordinates: ArrayList<Pair<Int, Int>>,
+        @param:JsonProperty("roadCoordinates") val roadCoordinates: List<CoordinateDto>,
     ) : RepresentationModel<DrivingFlowResponseDto>()

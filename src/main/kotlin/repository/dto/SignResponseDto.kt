@@ -2,9 +2,8 @@ package repository.dto
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.hateoas.RepresentationModel
 
-data class SignResponseDto
+class SignResponseDto
     @JsonCreator
     constructor(
         @param:JsonProperty("type")
@@ -12,7 +11,7 @@ data class SignResponseDto
         @param:JsonProperty("category")
         val category: String,
         @param:JsonProperty("idRoad")
-        val idRoad: Int,
+        val idRoad: String,
         @param:JsonProperty("direction")
         val direction: Int,
         @param:JsonProperty("latitude")
@@ -25,4 +24,4 @@ data class SignResponseDto
         val speedLimit: Int?,
         @param:JsonProperty("unit")
         val unit: String?,
-    ) : RepresentationModel<SignResponseDto>()
+    )
