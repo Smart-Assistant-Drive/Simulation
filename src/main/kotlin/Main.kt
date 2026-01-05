@@ -30,7 +30,7 @@ fun App(mainViewModel: SimulationViewModel) {
     val cars by mainViewModel.cars.collectAsState() // Collect the StateFlow
     val trafficSigns by mainViewModel.trafficSigns.collectAsState() // Collect the StateFlow
     LaunchedEffect(Unit) {
-        mainViewModel.startSimulation(1)
+        mainViewModel.startSimulation()
     }
     Scaffold(
         topBar = {

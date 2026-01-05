@@ -2,18 +2,15 @@ package viewmodel
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import model.domain.Car
 import model.domain.Direction
 import model.domain.Junction
 import model.domain.JunctionConnection
-import model.domain.RoadUtilities
 import model.domain.TrafficLight
 import model.domain.TrafficSign
 import model.math.Point
@@ -22,6 +19,7 @@ import repository.MqttRepository
 import repository.RemoteRepository
 import repository.RemoteStream
 import viewmodel.mapper.Mapper.convert
+import kotlin.collections.setOf
 
 class SimulationViewModel {
     private val _roadMap = MutableStateFlow<List<Direction>>(listOf())
@@ -32,7 +30,7 @@ class SimulationViewModel {
 
     private val _trafficLights = MutableStateFlow<List<TrafficLight>>(listOf())
     val trafficLights = _trafficLights // Expose as read-only
-    private val _cars = MutableStateFlow(setOf(Car(Point(0.0, 0.0))))
+    private val _cars = MutableStateFlow(setOf<Car>())
     val cars: StateFlow<Set<Car>> = _cars.asStateFlow()
     private val _trafficSigns = MutableStateFlow<Set<TrafficSign>>(setOf())
     val trafficSigns: StateFlow<Set<TrafficSign>> = _trafficSigns.asStateFlow()
@@ -228,52 +226,22 @@ class SimulationViewModel {
 
     private var started = false
 
-    fun startSimulation(cars: Int) {
+    fun startSimulation() {
         if (started) return
         started = true
+        val mqttRepository = MqttRepository()
         CoroutineScope(Dispatchers.IO).launch {
             getRoadMap()
-            // createCars(cars)
-            startTrafficLight(CoroutineScope(Dispatchers.IO))
-            // startCars()
-            // changeLine()
+            startTrafficLight(mqttRepository, CoroutineScope(Dispatchers.IO))
+            carsListener(mqttRepository, CoroutineScope(Dispatchers.IO))
         }
     }
 
-    suspend fun createCars(cars: Int) {
-        val speed = 10 // Set a default speed for the cars
-        val newCars =
-            (0..<cars)
-                .map {
-                    val directionIndex = (0..1).random() // Randomly choose a direction
-                    val road = _roadMap.value[directionIndex].roads[0] // Get the first direction
-                    val roadPoints = road.size
-                    val pointIndex = (0 until roadPoints).random() // Randomly choose a point on the road
-                    val point = road[pointIndex]
-                    val nextPointIndex = (pointIndex + 1) % roadPoints // Wrap around to the start if at the end
-                    val direction =
-                        Vector2D
-                            .fromPoints(
-                                point,
-                                road[nextPointIndex], // Wrap around to the start if at the end
-                            ).normalize() // Get the direction vector from the point to the next point
-                    Car(
-                        point,
-                        speed,
-                        direction,
-                        directionIndex,
-                        0,
-                        nextPointIndex,
-                    ) // Create a car with a random point and fixed speed
-                }.toSet()
-        withContext(Dispatchers.Main) {
-            _cars.value = newCars // Update the state flow on the main thread.
-        }
-    }
-
-    fun startTrafficLight(scope: CoroutineScope) {
+    fun startTrafficLight(
+        mqttRepository: MqttRepository,
+        scope: CoroutineScope,
+    ) {
         val remoteStream = RemoteStream()
-        val mqttRepository = MqttRepository()
 
         _trafficLights.value.forEach { trafficLight ->
             scope.launch(Dispatchers.IO) {
@@ -294,45 +262,25 @@ class SimulationViewModel {
         }
     }
 
-    fun startCars() {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                delay(100) // Delay for 1 second
-                val newCars =
-                    _cars.value
-                        .map { car ->
-                            RoadUtilities.carMoveSafety(
-                                car,
-                                _roadMap.value,
-                                _junctions.value,
-                            ) // Move the car safely along the road
-                        }.map { car ->
-                            RoadUtilities.changeDirection(car, _junctions.value) // Change the direction of the car if needed
-                        }.toSet()
-
-                withContext(Dispatchers.Main) {
-                    _cars.value = newCars // Update the state flow on the main thread.
+    fun carsListener(
+        mqttRepository: MqttRepository,
+        scope: CoroutineScope,
+    ) {
+        val remoteStream = RemoteStream()
+        scope.launch(Dispatchers.IO) {
+            remoteStream
+                .carsStream(mqttRepository)
+                .collect { newCar ->
+                    _cars.update { cars ->
+                        val mutableCars = cars.toMutableSet()
+                        val existingCar = mutableCars.find { it.id == newCar.id }
+                        if (existingCar != null) {
+                            mutableCars.remove(existingCar)
+                        }
+                        mutableCars.add(newCar)
+                        mutableCars.toSet()
+                    }
                 }
-            }
-        }
-    }
-
-    fun changeLine() {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                delay(5000) // Delay for 1 second
-                val newCars =
-                    _cars.value
-                        .map { car ->
-                            RoadUtilities.changeLine(
-                                car,
-                                _roadMap.value,
-                            ) // Change the line of the car
-                        }.toSet()
-                withContext(Dispatchers.Main) {
-                    _cars.value = newCars // Update the state flow on the main thread.
-                }
-            }
         }
     }
 
