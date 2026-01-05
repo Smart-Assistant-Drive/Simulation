@@ -15,7 +15,6 @@ import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import repository.MqttEvent
 
 class MqttRepository(
     brokerUrl: String = "tcp://127.0.0.1:1883",
@@ -71,6 +70,10 @@ class MqttRepository(
             runCatching {
                 client.connect(options)
                 client.subscribe("semaphore/+/change", 1)
+                client.subscribe(
+                    "trafficdt-digital-cars-digital-adapter/cars/carUpdate",
+                    1,
+                )
             }.onFailure {
                 it.printStackTrace()
             }
