@@ -21,7 +21,7 @@ data class Vector2D(
 
     fun normalize(): Vector2D {
         val mag = magnitude()
-        return if (mag == 0.0) Vector2D(0.0, 0.0) else Vector2D(x / mag, y / mag)
+        return if (mag < 1e-9) Vector2D(0.0, 0.0) else Vector2D(x / mag, y / mag)
     }
 
     fun degree(): Double = toDegrees(atan2(y, x))
