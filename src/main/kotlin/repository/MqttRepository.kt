@@ -38,7 +38,7 @@ class MqttRepository(
     val events: SharedFlow<MqttEvent> = _events.asSharedFlow()
 
     private val client: MqttClient =
-        MqttClient(brokerUrl, "traffic-light-client")
+        MqttClient(brokerUrl, "client-" + java.util.UUID.randomUUID())
 
     init {
         val options =
