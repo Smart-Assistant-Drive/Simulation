@@ -12,7 +12,7 @@ import model.domain.Car
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun CarCanvas(cars: Set<Car>) {
-    val carWidth = 20f
+    val carWidth = 16f
     val carHeight = 40f
     Canvas(modifier = Modifier.fillMaxSize()) {
         for (car in cars) {
@@ -22,7 +22,7 @@ fun CarCanvas(cars: Set<Car>) {
                 pivot = Offset(car.position.x.toFloat(), size.height - car.position.y.toFloat()),
             ) {
                 drawRect(
-                    color = Color.LightGray,
+                    color = Color.Cyan,
                     topLeft =
                         Offset(
                             x = car.position.x.toFloat() - carWidth / 2,

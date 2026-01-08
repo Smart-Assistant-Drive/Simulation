@@ -1,9 +1,12 @@
+package components
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import model.math.Point
 
@@ -18,7 +21,7 @@ fun RoadCanvas(allDirections: List<List<List<Point>>>) {
                     val roads = direction[int]
                     for (i in 0 until roads.size - 1) {
                         drawLine(
-                            color = if (int == 0) Color.Blue else Color.Red, // Color.Black,
+                            color = Color.Black, // Color.Black,
                             start =
                                 Offset(
                                     roads[i].x.toFloat(),
@@ -55,7 +58,7 @@ fun RoadCanvas(allDirections: List<List<List<Point>>>) {
                             strokeWidth = 5f,
                             cap = StrokeCap.Butt,
                             pathEffect =
-                                androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                                PathEffect.dashPathEffect(
                                     floatArrayOf(20f, 20f),
                                     0f,
                                 ),

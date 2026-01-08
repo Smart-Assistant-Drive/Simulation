@@ -16,6 +16,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import components.CarCanvas
 import components.JunctionCanvas
+import components.RoadCanvas
 import components.TrafficLightCanvas
 import components.TrafficSignCanvas
 import viewmodel.SimulationViewModel
@@ -43,8 +44,8 @@ fun App(mainViewModel: SimulationViewModel) {
             )
             JunctionCanvas(junctions.map { it.position })
             TrafficLightCanvas(trafficLights)
-            CarCanvas(cars)
             TrafficSignCanvas(trafficSigns) // Example traffic sign
+            CarCanvas(cars)
         }
     }
 }
