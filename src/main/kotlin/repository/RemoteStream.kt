@@ -19,7 +19,7 @@ class RemoteStream(
         private fun trafficLightTopic(id: String) = "semaphore/$id/change"
 
         private const val CAR_UPDATE_TOPIC =
-            "trafficdt-digital-cars-digital-adapter/cars/carUpdate"
+            "trafficdt-digital-cars/+/cars/carUpdate"
     }
 
     private fun TrafficLightMessage.toState(): TrafficLightState =
@@ -46,7 +46,7 @@ class RemoteStream(
 
     fun carsStream(mqttRepository: MqttRepository): Flow<Car> =
         mqttRepository.events
-            .filter { it.topic == CAR_UPDATE_TOPIC }
+            .filter { it.topic.matches(Regex(CAR_UPDATE_TOPIC.replace("+", "[^/]+"))) }
             .mapNotNull { event ->
                 runCatching {
                     mqttRepository.mapper

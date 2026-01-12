@@ -71,7 +71,7 @@ class MqttRepository(
                 client.connect(options)
                 client.subscribe("semaphore/+/change", 1)
                 client.subscribe(
-                    "trafficdt-digital-cars-digital-adapter/cars/carUpdate",
+                    "trafficdt-digital-cars/+/cars/carUpdate",
                     1,
                 )
             }.onFailure {
